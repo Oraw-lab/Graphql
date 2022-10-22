@@ -88,7 +88,9 @@ async function GetYmlContect(ListOfAllFiles)
 
 async function mainData()
 {
-  octokit = new Octokit({auth: dotenv.parsed["TOKEN"]});
+  try
+  {
+    octokit = new Octokit({auth: dotenv.parsed["TOKEN"]});
 
     var currentWorkingDir = process.cwd();
     var AllRevelentRepo = await GetAllRepos();
@@ -98,6 +100,12 @@ async function mainData()
       repo["content"] = await GetYmlContect(files);
     }
     return AllRevelentRepo;
+  }
+  catch(err)
+  {
+    console.log(err);
+    return [];
+  }
 }
 
 

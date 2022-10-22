@@ -4,11 +4,29 @@ const { Octokit } = require("@octokit/core");
 const { log } = require("console");
 const fs  = require("fs");
 const { readdir } = require("fs").promises;
+const shell = require("shelljs");
+const e = require("express");
 module.exports = mainData();
 
 
 var octokit = null;
 
+
+async function CloneGitRepo(ListOfRepos)
+{
+    const path = process.cwd() + "//"; 
+    for(const repo of ListOfRepos)
+    {
+      if(!fs.existsSync(path + repo.RepoName)){
+        {
+          shell.cd(path);
+          const gitUrl = "https://www.github.com/" + repo.owner + "/" + repo.RepoName;
+          shell.exec('git clone ' + gitUrl);
+        }
+      }
+
+    }
+}
 async function GetAllRepos()
 {
     const response = await octokit.graphql(
@@ -28,7 +46,7 @@ async function GetAllRepos()
             }
           }`,{queryString:"org:oraw-lab"}
     );
-    let ArrayOfReleventJson = [];
+    var ArrayOfReleventJson = [];
     for(const repo of response.search.edges)
     {
         if(repo.node.name.startsWith("Repo"))
@@ -56,7 +74,7 @@ async function GetAllRepos()
 
 // Listing all files in Repo
 const getFileList = async (dirName) => {
-  let files = [];
+  var files = [];
   const items = await readdir(dirName, { withFileTypes: true });
 
   for (const item of items) {
@@ -90,10 +108,12 @@ async function mainData()
 {
   try
   {
-    octokit = new Octokit({auth: dotenv.parsed["TOKEN"]});
+    //octokit = new Octokit({auth: dotenv.parsed["TOKEN"]});
+    octokit = new Octokit({auth: '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'});
 
     var currentWorkingDir = process.cwd();
     var AllRevelentRepo = await GetAllRepos();
+    CloneGitRepo(AllRevelentRepo);
     for(const repo of AllRevelentRepo)
     {
       var files = await getFileList(currentWorkingDir + "\\" + repo.RepoName);

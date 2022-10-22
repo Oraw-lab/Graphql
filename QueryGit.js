@@ -108,9 +108,8 @@ async function mainData()
 {
   try
   {
-    //octokit = new Octokit({auth: dotenv.parsed["TOKEN"]});
-    octokit = new Octokit({auth: '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'});
-
+    octokit = new Octokit({auth: dotenv.parsed["TOKEN"]});
+    
     var currentWorkingDir = process.cwd();
     var AllRevelentRepo = await GetAllRepos();
     CloneGitRepo(AllRevelentRepo);

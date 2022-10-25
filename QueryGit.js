@@ -8,10 +8,6 @@ const shell = require("shelljs");
 const e = require("express");
 module.exports = mainData();
 
-
-var octokit = null;
-
-
 async function CloneGitRepo(ListOfRepos)
 {
     const path = process.cwd() + "//"; 
@@ -27,7 +23,7 @@ async function CloneGitRepo(ListOfRepos)
 
     }
 }
-async function GetAllRepos()
+async function GetAllRepos(octokit)
 {
     const response = await octokit.graphql(
         `query myOrgRepos($queryString: String!) {
@@ -46,13 +42,13 @@ async function GetAllRepos()
             }
           }`,{queryString:"org:oraw-lab"}
     );
-    var ArrayOfReleventJson = [];
+    let ArrayOfReleventJson = [];
     for(const repo of response.search.edges)
     {
         if(repo.node.name.startsWith("Repo"))
         {
           // getting all info on repo (Web hooks, owner , repoName)
-          var PlaceOfSlash = repo.node.nameWithOwner.indexOf("/");
+          let PlaceOfSlash = repo.node.nameWithOwner.indexOf("/");
           repo.node.nameWithOwner = repo.node.nameWithOwner.substr(0,PlaceOfSlash)
           const resOfHooks = await octokit.request('GET /repos/{owner}/{repo}/hooks', {
             owner: repo.node.nameWithOwner,
@@ -74,7 +70,7 @@ async function GetAllRepos()
 
 // Listing all files in Repo
 const getFileList = async (dirName) => {
-  var files = [];
+  let files = [];
   const items = await readdir(dirName, { withFileTypes: true });
 
   for (const item of items) {
@@ -108,14 +104,15 @@ async function mainData()
 {
   try
   {
-    octokit = new Octokit({auth: dotenv.parsed["TOKEN"]});
+
+    const octokit = new Octokit({auth: dotenv.parsed["TOKEN"]});
     
-    var currentWorkingDir = process.cwd();
-    var AllRevelentRepo = await GetAllRepos();
+    let currentWorkingDir = process.cwd();
+    let AllRevelentRepo = await GetAllRepos(octokit);
     CloneGitRepo(AllRevelentRepo);
     for(const repo of AllRevelentRepo)
     {
-      var files = await getFileList(currentWorkingDir + "\\" + repo.RepoName);
+      let files = await getFileList(currentWorkingDir + "\\" + repo.RepoName);
       repo["content"] = await GetYmlContect(files);
     }
     return AllRevelentRepo;
@@ -126,6 +123,3 @@ async function mainData()
     return [];
   }
 }
-
-
-mainData();

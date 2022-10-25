@@ -1,7 +1,7 @@
 
  const ApolloServer  = require ('@apollo/server');
  const startStandaloneServer = require('@apollo/server/standalone');
- var GetData = require('./QueryGit.js')
+ const GetData = require('./QueryGit.js')
 
 
  const typeDefs = `type Repo{
@@ -19,7 +19,7 @@
  `;
     async function main()
     {
-      var DataOfRepos = await GetData;
+      let DataOfRepos = await GetData;
       const resolvers = {
               Query: {
                   Repos: () => DataOfRepos,
